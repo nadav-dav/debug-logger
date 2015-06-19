@@ -12,35 +12,39 @@ var utilOut = {
 function DebugLogger(section, prefix, out){
     this._section = section;
     this._prefix = prefix || section;
-    this._proxy = out || utilOut;
+    this._out = out || utilOut;
 };
 
 DebugLogger.prototype.prefix = function prefix(prefix){
     if (this._prefix == '')
         return new(this._section, prefix);
     else{
-        return new DebugLogger(this._section, this._prefix + ':' + prefix, this._proxy);
+        return new DebugLogger(this._section, this._prefix + ':' + prefix, this._out);
     }
 };
 
-DebugLogger.prototype.through = function through(out){
-    this._proxy = out;
+DebugLogger.prototype.out = function out(out){
+    this._out = out;
 };
 
 DebugLogger.prototype.log   = function log(){
-    var msg = this._prefix+" "+Array.prototype.slice.call(arguments).join(", ");
-    this._proxy.log(msg);
+    var msg = createMessage.bind(this)(arguments);
+    this._out.log(msg);
 }
 
 DebugLogger.prototype.error   = function error(){
-    var msg = this._prefix+" "+Array.prototype.slice.call(arguments).join(", ");
-    this._proxy.error(msg);
+    var msg = createMessage.bind(this)(arguments);
+    this._out.error(msg);
 }
 
 DebugLogger.prototype.debug   = function debug(){
-    var msg = this._prefix+" "+Array.prototype.slice.call(arguments).join(", ");
-    this._proxy.debug(msg);
+    var msg = createMessage.bind(this)(arguments);
+    this._out.debug(msg);
 };
+
+function createMessage (args) {
+    return this._prefix+" "+Array.prototype.slice.call(args).join(", ");
+}
 
 module.exports = function (section, prefix){
     var isActive = debugEnv.indexOf(section) != -1;
